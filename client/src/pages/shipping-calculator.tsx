@@ -197,12 +197,13 @@ export default function ShippingCalculator() {
       { name: '8-10 Day shipping', maxDays: 10 },
     ];
 
-    const suitableOption = shippingOptions.find(option => option.maxDays >= businessDaysNeeded);
+    const suitableOptions = shippingOptions.filter(option => option.maxDays <= businessDaysNeeded);
 
-    if (suitableOption) {
-      setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${suitableOption.name}.`);
+    if (suitableOptions.length > 0) {
+      const slowestOption = suitableOptions[suitableOptions.length - 1];
+      setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${slowestOption.name}.`);
     } else {
-      setRecommendation(`Great news! All shipping options will arrive before ${formattedDate}.`);
+      setRecommendation(`Sorry, even Overnight shipping cannot guarantee delivery by ${formattedDate}. Please select a later date.`);
     }
   };
 
