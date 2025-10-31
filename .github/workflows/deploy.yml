@@ -34,6 +34,16 @@ jobs:
         env:
           NODE_ENV: production
         
+      - name: Add .nojekyll file
+        run: touch dist/public/.nojekyll
+        
+      - name: List build output (debug)
+        run: |
+          echo "Contents of dist/public:"
+          ls -la dist/public || echo "dist/public not found!"
+          echo "Checking for index.html:"
+          test -f dist/public/index.html && echo "✓ index.html exists" || echo "✗ index.html NOT found!"
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
