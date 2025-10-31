@@ -124,6 +124,12 @@ export default function ShippingCalculator() {
   const [targetDate, setTargetDate] = useState<string>('');
   const [recommendation, setRecommendation] = useState<string>('');
 
+  // --- Dev/test time override ---
+  const [manualNow, setManualNow] = useState<Date | null>(null);
+
+  // helper: get current time (real or manual override)
+  const getNow = () => (manualNow ? new Date(manualNow) : getCurrentDate());
+
   const updateDeliveryDates = (base: Date) => {
     const shippingSpeeds = [
       { speed: 'Overnight', label: '1 Business Day', days: 1 },
@@ -228,7 +234,7 @@ export default function ShippingCalculator() {
     setFadeIn(true);
 
     const interval = setInterval(() => {
-      const now = getCurrentDate();
+      const now = getNow();
       const newDeadline = nextShippingCutoff(now);
 
       // detect rollover (e.g., noon or after weekend/holiday)
@@ -248,7 +254,19 @@ export default function ShippingCalculator() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [deadline]);
+  }, [deadline, manualNow]);
+
+  // when manualNow changes, immediately refresh the UI as if time jumped
+  useEffect(() => {
+    if (manualNow) {
+      const now = getNow();
+      const newDeadline = nextShippingCutoff(now);
+      setDeadline(newDeadline);
+      setCutoffDate(formatDate(newDeadline));
+      updateDeliveryDates(newDeadline);
+      setTimeLeft(diff(now, newDeadline));
+    }
+  }, [manualNow]);
 
   const TimeSegment = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center gap-1" data-testid={`countdown-${label.toLowerCase()}`}>
@@ -272,6 +290,21 @@ export default function ShippingCalculator() {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
+
+        {/* --- Developer test control --- */}
+        <div className="mb-4 border border-border rounded-md p-3 bg-muted/30" data-testid="dev-time-control">
+          <label className="block text-sm font-medium mb-1">🧪 Simulate Current Time (for testing)</label>
+          <input
+            type="datetime-local"
+            className="border rounded p-1 text-sm w-full"
+            data-testid="input-manual-time"
+            onChange={(e) => {
+              const val = e.target.value;
+              setManualNow(val ? new Date(val) : null);
+            }}
+          />
+        </div>
+
         <Card className={`p-6 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           <div className="space-y-5">
             <div className="text-center space-y-2">
