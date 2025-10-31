@@ -292,27 +292,30 @@ export default function ShippingCalculator() {
                     msOverflowStyle: 'none' 
                   }}>
                     <div className="min-w-[600px] md:min-w-0 px-4 py-3">
-                      <div className="grid grid-cols-5 gap-4">
-                        {deliveryDates.map((item, idx) => (
-                          <div key={idx} className="flex flex-col items-center" data-testid={`timeline-item-${idx}`}>
-                            <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
-                              <div className="text-sm font-semibold text-foreground whitespace-nowrap" data-testid={`speed-${idx}`}>
-                                {item.label}
+                      <div className="relative">
+                        <div className="grid grid-cols-5">
+                          {deliveryDates.map((item, idx) => (
+                            <div key={idx} className="flex flex-col items-center px-2" data-testid={`timeline-item-${idx}`}>
+                              <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
+                                <div className="text-sm font-semibold text-foreground whitespace-nowrap" data-testid={`speed-${idx}`}>
+                                  {item.label}
+                                </div>
+                              </div>
+
+                              <div className="relative w-full flex justify-center items-center" style={{ height: '8px' }}>
+                                <div className="relative z-10 w-2 h-2 rounded-full bg-primary" data-testid={`dot-${idx}`} />
+                              </div>
+
+                              <div className="text-center mt-3">
+                                <div className="text-sm font-medium text-foreground" data-testid={`delivery-date-${idx}`}>
+                                  {item.date}{item.hasHoliday && '*'}
+                                </div>
                               </div>
                             </div>
-
-                            <div className="relative w-full flex justify-center items-center" style={{ height: '8px' }}>
-                              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-border -translate-y-1/2" />
-                              <div className="relative z-10 w-2 h-2 rounded-full bg-primary" data-testid={`dot-${idx}`} />
-                            </div>
-
-                            <div className="text-center mt-3">
-                              <div className="text-sm font-medium text-foreground" data-testid={`delivery-date-${idx}`}>
-                                {item.date}{item.hasHoliday && '*'}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                        
+                        <div className="absolute left-[10%] right-[10%] h-0.5 bg-border" style={{ top: 'calc(2.5rem + 0.75rem + 3px)' }} />
                       </div>
                     </div>
                   </div>
