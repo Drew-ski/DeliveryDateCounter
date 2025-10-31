@@ -10,9 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 
 const shippingHolidays = [
-  new Date("Nov 23, 2023"),
-  new Date("Dec 25, 2023"),
-  new Date("Jan 1, 2024")
+  new Date("Nov 27, 2025"),  // Thanksgiving 2025
+  new Date("Dec 25, 2025"),  // Christmas 2025
+  new Date("Jan 1, 2026"),   // New Year's Day 2026
 ];
 
 function ordinalSuffix(n: number): string {
@@ -22,13 +22,9 @@ function ordinalSuffix(n: number): string {
 }
 
 function getCurrentDate(): Date {
-  // TESTING: Fixed time at 10/30/2025 11:58am EST (2 minutes before cutoff)
-  return new Date("Oct 30, 2025 11:58:00 EST");
-  
-  // PRODUCTION: Use real time (uncomment after testing)
-  // const userTime = new Date();
-  // const nyTime = new Date(userTime.toLocaleString("en-US", { timeZone: "America/New_York" }));
-  // return nyTime;
+  const userTime = new Date();
+  const nyTime = new Date(userTime.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  return nyTime;
 }
 
 function isWeekend(date: Date): boolean {
@@ -201,11 +197,16 @@ export default function ShippingCalculator() {
       { name: '8-10 Day shipping', maxDays: 10 },
     ];
 
+    if (businessDaysNeeded < 1) {
+      setRecommendation('Please select a future delivery date.');
+      return;
+    }
+
     const suitableOptions = shippingOptions.filter(option => option.maxDays <= businessDaysNeeded);
 
     if (suitableOptions.length > 0) {
-      const slowestOption = suitableOptions[suitableOptions.length - 1];
-      setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${slowestOption.name}.`);
+      const slowestSuitable = suitableOptions[suitableOptions.length - 1];
+      setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${slowestSuitable.name}.`);
     } else {
       setRecommendation(`Sorry, even Overnight shipping cannot guarantee delivery by ${formattedDate}. Please select a later date.`);
     }

@@ -82,12 +82,22 @@ Preferred communication style: Simple, everyday language.
 **Date/Time Handling**
 - User's local time converted to Eastern Time (America/New_York) for consistent cutoff calculations
 - Date arithmetic accounts for month boundaries and leap years via native Date API
-- Holiday list hardcoded in component (Nov 23 2023, Dec 25 2023, Jan 1 2024)
+- Shipping holidays defined at top of component (Nov 27 2025, Dec 25 2025, Jan 1 2026) - easily updatable
+- Holiday asterisk system: delivery dates affected by holidays show '*' with message at bottom
 
 **Countdown Timer**
 - Calculates time remaining until next 12 PM EST cutoff
 - Updates every second for real-time display
 - Pluralization logic for time unit labels (day/days, hour/hours, etc.)
+- Automatic reset with fade animation when countdown reaches zero
+
+**Reverse Lookup Feature (Date Picker)**
+- Collapsible accordion below timeline allows users to select target delivery date
+- Algorithm counts business days from ship date to target (skipping weekends and holidays)
+- Recommends slowest (cheapest) shipping option that guarantees on-time delivery
+- Logic: Filters options where maxDays <= businessDaysNeeded, then selects slowest
+- Example: If target is 3 business days away, recommends "2 Day" (not "3-4 Day" which takes 4 days)
+- Edge case handling: Validates target is in future, handles same-day targets gracefully
 
 ## External Dependencies
 
