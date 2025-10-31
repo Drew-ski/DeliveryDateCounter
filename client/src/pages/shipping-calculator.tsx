@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Clock, Package } from 'lucide-react';
+import { Clock, Package, Calendar } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
 
 const shippingHolidays = [
   new Date("Nov 23, 2023"),
@@ -88,9 +95,11 @@ interface TimeLeft {
 export default function ShippingCalculator() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
   const [cutoffDate, setCutoffDate] = useState<string>('');
-  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean }>>([]);
+  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean; days: number }>>([]);
   const [showHolidayMessage, setShowHolidayMessage] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
+  const [targetDate, setTargetDate] = useState<string>('');
+  const [recommendation, setRecommendation] = useState<string>('');
 
   const calculateTimeLeft = (): TimeLeft => {
     const now = getCurrentDate();
@@ -107,11 +116,11 @@ export default function ShippingCalculator() {
 
   const updateDeliveryDates = () => {
     const shippingSpeeds = [
-      { speed: 'Overnight', label: '1 Business Day', days: 1 },
-      { speed: '2 Day', label: '2 Business Days', days: 2 },
-      { speed: '3-4 Day', label: '3-4 Business Days', days: 4 },
-      { speed: '5-7 Day', label: '5-7 Business Days', days: 7 },
-      { speed: '8-10 Day', label: '8-10 Business Days', days: 10 },
+      { speed: 'Overnight', label: 'Overnight', days: 1 },
+      { speed: '2 Day', label: '2', days: 2 },
+      { speed: '3-4 Day', label: '3-4', days: 4 },
+      { speed: '5-7 Day', label: '5-7', days: 7 },
+      { speed: '8-10 Day', label: '8-10', days: 10 },
     ];
 
     const dates = shippingSpeeds.map(({ speed, label, days }) => {
@@ -121,11 +130,55 @@ export default function ShippingCalculator() {
         label,
         date: formatDate(deliveryDate),
         hasHoliday: containsShippingHoliday,
+        days,
       };
     });
 
     setDeliveryDates(dates);
     setShowHolidayMessage(dates.some(d => d.hasHoliday));
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputDate = e.target.value;
+    setTargetDate(inputDate);
+
+    if (!inputDate) {
+      setRecommendation('');
+      return;
+    }
+
+    const target = new Date(inputDate + 'T12:00:00');
+    const now = getCurrentDate();
+    const shipDate = getShipDate(now);
+
+    let businessDaysNeeded = 0;
+    let currentDate = new Date(shipDate);
+
+    while (currentDate < target) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      if (!isWeekend(currentDate) && !isShippingHoliday(currentDate)) {
+        businessDaysNeeded++;
+      }
+    }
+
+    let recommendedSpeed = '';
+    if (businessDaysNeeded <= 1) {
+      recommendedSpeed = 'Overnight shipping';
+    } else if (businessDaysNeeded <= 2) {
+      recommendedSpeed = '2 Day shipping';
+    } else if (businessDaysNeeded <= 4) {
+      recommendedSpeed = '3-4 Day shipping';
+    } else if (businessDaysNeeded <= 7) {
+      recommendedSpeed = '5-7 Day shipping';
+    } else if (businessDaysNeeded <= 10) {
+      recommendedSpeed = '8-10 Day shipping';
+    } else {
+      setRecommendation(`We cannot guarantee delivery by ${new Date(inputDate).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })} with our current shipping options.`);
+      return;
+    }
+
+    const formattedDate = new Date(inputDate).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+    setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${recommendedSpeed}.`);
   };
 
   useEffect(() => {
@@ -176,8 +229,8 @@ export default function ShippingCalculator() {
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        <Card className={`p-8 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="space-y-6">
+        <Card className={`p-6 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="space-y-5">
             <div className="text-center space-y-2">
               <p className="text-base text-foreground" data-testid="text-shipping-details">
                 Orders placed before <span className="font-semibold">12:00pm E.S.T.</span> on{' '}
@@ -199,38 +252,36 @@ export default function ShippingCalculator() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-primary" />
                 <h3 className="text-lg font-semibold">Guaranteed Delivery Timeline</h3>
               </div>
 
-              <div className="relative px-4 py-8">
-                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-border" style={{ transform: 'translateY(-50%)' }} />
+              <div className="relative px-4 py-4">
+                <div className="absolute left-[10%] right-[10%] top-[28px] h-0.5 bg-border" />
                 
-                <div className="relative flex justify-between items-center">
+                <div className="relative flex justify-between items-start">
                   {deliveryDates.map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center flex-1" data-testid={`timeline-item-${idx}`}>
-                      <div className="relative z-10 mb-6">
+                      <div className="relative z-10 mb-4">
                         <div 
-                          className={`w-12 h-12 rounded-full border-4 border-background flex items-center justify-center font-bold text-sm transition-all ${
-                            idx === 0 
-                              ? 'bg-primary text-primary-foreground scale-110' 
-                              : 'bg-card border-primary/20 text-foreground hover-elevate'
-                          }`}
+                          className="w-14 h-14 rounded-full border-4 border-background bg-card flex items-center justify-center font-bold text-sm text-foreground hover-elevate"
                           data-testid={`circle-${idx}`}
                         >
                           {idx + 1}
                         </div>
                       </div>
 
-                      <div className="text-center space-y-1 max-w-[140px]">
+                      <div className="text-center space-y-0.5 max-w-[140px]">
                         <div className="text-sm font-semibold text-foreground" data-testid={`speed-${idx}`}>
-                          {item.speed}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
                           {item.label}
                         </div>
+                        {item.label !== 'Overnight' && (
+                          <div className="text-xs text-muted-foreground">
+                            Business Days
+                          </div>
+                        )}
                         <div className="text-sm font-medium text-foreground mt-2" data-testid={`delivery-date-${idx}`}>
                           {item.date}{item.hasHoliday && '*'}
                         </div>
@@ -240,6 +291,39 @@ export default function ShippingCalculator() {
                 </div>
               </div>
             </div>
+
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="date-calculator" className="border-none">
+                <AccordionTrigger className="hover-elevate rounded-lg px-4 py-3 hover:no-underline" data-testid="button-date-calculator">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Find shipping speed by delivery date</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pt-2 pb-4">
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <label htmlFor="target-date" className="text-sm font-medium text-foreground">
+                        When do you need your package?
+                      </label>
+                      <Input
+                        id="target-date"
+                        type="date"
+                        value={targetDate}
+                        onChange={handleDateChange}
+                        className="w-full"
+                        data-testid="input-target-date"
+                      />
+                    </div>
+                    {recommendation && (
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg p-3" data-testid="text-recommendation">
+                        <p className="text-sm font-medium text-foreground">{recommendation}</p>
+                      </div>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
             {showHolidayMessage && (
               <p className="text-sm text-muted-foreground italic text-right" data-testid="text-holiday-message">
