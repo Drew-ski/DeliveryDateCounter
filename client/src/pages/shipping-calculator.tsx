@@ -22,9 +22,13 @@ function ordinalSuffix(n: number): string {
 }
 
 function getCurrentDate(): Date {
-  const userTime = new Date();
-  const nyTime = new Date(userTime.toLocaleString("en-US", { timeZone: "America/New_York" }));
-  return nyTime;
+  // TESTING: Fixed time at 10/31/2025 11:59am EST (1 minute before cutoff)
+  return new Date("Oct 31, 2025 11:59:00 EST");
+  
+  // PRODUCTION: Use real time (uncomment after testing)
+  // const userTime = new Date();
+  // const nyTime = new Date(userTime.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  // return nyTime;
 }
 
 function isWeekend(date: Date): boolean {
