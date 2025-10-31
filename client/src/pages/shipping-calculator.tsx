@@ -199,12 +199,11 @@ export default function ShippingCalculator() {
 
     const suitableOption = shippingOptions.find(option => option.maxDays >= businessDaysNeeded);
 
-    if (!suitableOption) {
-      setRecommendation(`We cannot guarantee delivery by ${formattedDate} with our current shipping options.`);
-      return;
+    if (suitableOption) {
+      setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${suitableOption.name}.`);
+    } else {
+      setRecommendation(`Great news! All shipping options will arrive before ${formattedDate}.`);
     }
-
-    setRecommendation(`To ensure delivery by ${formattedDate}, we recommend ${suitableOption.name}.`);
   };
 
   useEffect(() => {
@@ -253,8 +252,8 @@ export default function ShippingCalculator() {
   const showSeconds = timeLeft.days === 0;
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-4xl mx-auto">
         <Card className={`p-6 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           <div className="space-y-5">
             <div className="text-center space-y-2">
@@ -270,7 +269,7 @@ export default function ShippingCalculator() {
                 <h2 className="text-xl font-semibold" data-testid="text-order-within">Order within:</h2>
               </div>
 
-              <div className="flex items-center justify-center gap-8 flex-wrap">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
                 {showDays && <TimeSegment value={timeLeft.days} label="Days" />}
                 {showHours && <TimeSegment value={timeLeft.hours} label="Hours" />}
                 <TimeSegment value={timeLeft.minutes} label="Minutes" />
@@ -291,13 +290,13 @@ export default function ShippingCalculator() {
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none' 
                   }}>
-                    <div className="min-w-[600px] md:min-w-0 px-4 py-3">
+                    <div className="min-w-[800px] md:min-w-0 px-4 py-3">
                       <div className="relative">
                         <div className="grid grid-cols-5">
                           {deliveryDates.map((item, idx) => (
                             <div key={idx} className="flex flex-col items-center px-2" data-testid={`timeline-item-${idx}`}>
                               <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
-                                <div className="text-sm font-semibold text-foreground whitespace-nowrap" data-testid={`speed-${idx}`}>
+                                <div className="text-sm font-semibold text-foreground" data-testid={`speed-${idx}`}>
                                   {item.label}
                                 </div>
                               </div>
