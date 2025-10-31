@@ -11,6 +11,10 @@ This guide will help you deploy your shipping calculator to GitHub Pages so you 
 3. Make it **Public** (required for free GitHub Pages)
 4. Don't initialize with README (we'll push existing code)
 
+**Important:** The repository name will be part of your URL:
+- Repository named `shipping-calculator` → `https://username.github.io/shipping-calculator/`
+- Choose a short, memorable name for easier embedding
+
 ### Step 2: Push Your Code to GitHub
 
 In your Replit terminal, run these commands (replace `YOUR-USERNAME` and `YOUR-REPO-NAME`):
@@ -101,6 +105,44 @@ Once deployed, use this iframe code on any website:
 
 ---
 
+## Alternative: Use Root Domain (Cleaner URL)
+
+If you want a cleaner URL without the repository name, you can use a root-level GitHub Pages site:
+
+### Option A: User/Organization Site
+
+1. Create a repository named exactly: `YOUR-USERNAME.github.io`
+   - Example: `johndoe.github.io`
+2. Follow steps 2-6 above
+3. **Important:** Edit `.github/workflows/deploy.yml` and change:
+   ```yaml
+   run: npx vite build --base="/${{ github.event.repository.name }}/"
+   ```
+   to:
+   ```yaml
+   run: npx vite build --base="/"
+   ```
+4. Your site will be at: `https://YOUR-USERNAME.github.io/`
+5. Embed code becomes:
+   ```html
+   <iframe src="https://YOUR-USERNAME.github.io/" ...></iframe>
+   ```
+
+### Which Option Should You Choose?
+
+**Repository Site** (`username.github.io/repo-name/`):
+- ✅ Can have multiple GitHub Pages sites
+- ✅ Works with the default workflow (no changes needed)
+- ❌ Longer URL with repository name
+
+**Root Site** (`username.github.io/`):
+- ✅ Cleaner, shorter URL
+- ✅ Easier to remember and share
+- ❌ Only one root site per GitHub account
+- ⚠️ Requires editing the workflow file (change base path to "/")
+
+---
+
 ## Making Updates
 
 Whenever you make changes to your calculator:
@@ -165,10 +207,15 @@ The deployment workflow is already set up in:
 This workflow:
 - Triggers automatically on every push to the `main` branch
 - Installs dependencies
-- Builds your React app
+- Builds your React app with the correct base path for your repository
 - Deploys to GitHub Pages
 
-You don't need to modify this file unless you want to customize the deployment process.
+**How It Works:**
+The workflow automatically detects your repository name and sets the correct base path. This ensures all assets (CSS, JavaScript, images) load properly when served from `https://username.github.io/repo-name/`.
+
+You don't need to modify this file unless you want to:
+- Use a root-level site (see "Alternative: Use Root Domain" section above)
+- Customize the deployment process
 
 ---
 
