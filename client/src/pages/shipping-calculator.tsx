@@ -125,10 +125,16 @@ export default function ShippingCalculator() {
   const [recommendation, setRecommendation] = useState<string>('');
 
   // --- Dev/test time override ---
-  const [manualNow, setManualNow] = useState<Date | null>(null);
+  const [timeOffset, setTimeOffset] = useState<number>(0);
 
-  // helper: get current time (real or manual override)
-  const getNow = () => (manualNow ? new Date(manualNow) : getCurrentDate());
+  // helper: get current time (real or with offset applied)
+  const getNow = () => {
+    const realNow = getCurrentDate();
+    if (timeOffset !== 0) {
+      return new Date(realNow.getTime() + timeOffset);
+    }
+    return realNow;
+  };
 
   const updateDeliveryDates = (base: Date) => {
     const shippingSpeeds = [
@@ -254,11 +260,11 @@ export default function ShippingCalculator() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [deadline, manualNow]);
+  }, [deadline, timeOffset]);
 
-  // when manualNow changes, immediately refresh the UI as if time jumped
+  // when timeOffset changes, immediately refresh the UI as if time jumped
   useEffect(() => {
-    if (manualNow) {
+    if (timeOffset !== 0) {
       const now = getNow();
       const newDeadline = nextShippingCutoff(now);
       setDeadline(newDeadline);
@@ -266,7 +272,7 @@ export default function ShippingCalculator() {
       updateDeliveryDates(newDeadline);
       setTimeLeft(diff(now, newDeadline));
     }
-  }, [manualNow]);
+  }, [timeOffset]);
 
   const TimeSegment = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center gap-1" data-testid={`countdown-${label.toLowerCase()}`}>
@@ -293,14 +299,21 @@ export default function ShippingCalculator() {
 
         {/* --- Developer test control --- */}
         <div className="mb-4 border border-border rounded-md p-3 bg-muted/30" data-testid="dev-time-control">
-          <label className="block text-sm font-medium mb-1">🧪 Simulate Current Time (for testing)</label>
+          <label className="block text-sm font-medium mb-1">🧪 Simulate Current Time (for testing - countdown will tick from this time)</label>
           <input
             type="datetime-local"
             className="border rounded p-1 text-sm w-full"
             data-testid="input-manual-time"
             onChange={(e) => {
               const val = e.target.value;
-              setManualNow(val ? new Date(val) : null);
+              if (val) {
+                const selectedTime = new Date(val);
+                const realNow = getCurrentDate();
+                const offset = selectedTime.getTime() - realNow.getTime();
+                setTimeOffset(offset);
+              } else {
+                setTimeOffset(0);
+              }
             }}
           />
         </div>
