@@ -284,28 +284,45 @@ export default function ShippingCalculator() {
                 <h3 className="text-lg font-semibold">Guaranteed Delivery Timeline</h3>
               </div>
 
-              <div className="relative px-4 py-3">
-                <div className="relative flex justify-between items-start">
-                  {deliveryDates.map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center flex-1" data-testid={`timeline-item-${idx}`}>
-                      <div className="text-center mb-3">
-                        <div className="text-sm font-semibold text-foreground" data-testid={`speed-${idx}`}>
-                          {item.label}
-                        </div>
-                      </div>
+              <div className="relative">
+                <div className="relative overflow-hidden rounded-md">
+                  <div className="overflow-x-auto scrollbar-hide md:overflow-visible relative" style={{ 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none' 
+                  }}>
+                    <div className="min-w-[600px] md:min-w-0 px-4 py-3">
+                      <div className="grid grid-cols-5 gap-4">
+                        {deliveryDates.map((item, idx) => (
+                          <div key={idx} className="flex flex-col items-center" data-testid={`timeline-item-${idx}`}>
+                            <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
+                              <div className="text-sm font-semibold text-foreground whitespace-nowrap" data-testid={`speed-${idx}`}>
+                                {item.label}
+                              </div>
+                            </div>
 
-                      <div className="relative w-full flex justify-center">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-border" style={{ top: '0px' }} />
-                        <div className="relative z-10 w-2 h-2 rounded-full bg-primary" data-testid={`dot-${idx}`} />
-                      </div>
+                            <div className="relative w-full flex justify-center items-center" style={{ height: '8px' }}>
+                              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-border -translate-y-1/2" />
+                              <div className="relative z-10 w-2 h-2 rounded-full bg-primary" data-testid={`dot-${idx}`} />
+                            </div>
 
-                      <div className="text-center mt-3 max-w-[140px]">
-                        <div className="text-sm font-medium text-foreground" data-testid={`delivery-date-${idx}`}>
-                          {item.date}{item.hasHoliday && '*'}
-                        </div>
+                            <div className="text-center mt-3">
+                              <div className="text-sm font-medium text-foreground" data-testid={`delivery-date-${idx}`}>
+                                {item.date}{item.hasHoliday && '*'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="absolute left-0 top-0 bottom-[2.5rem] w-8 bg-gradient-to-r from-card to-transparent pointer-events-none md:hidden" />
+                  <div className="absolute right-0 top-0 bottom-[2.5rem] w-8 bg-gradient-to-l from-card to-transparent pointer-events-none md:hidden" />
+                </div>
+                
+                <div className="flex justify-center mt-2 md:hidden">
+                  <div className="text-xs text-muted-foreground">← Scroll for more →</div>
                 </div>
               </div>
             </div>
