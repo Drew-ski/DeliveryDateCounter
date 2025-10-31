@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Shipping Date Caculator</title>
+    <link href="ShippingDate.css" rel="stylesheet"> 
+
+  </head>
+    <body onload="populateDeliveryDates()" class="ship_date_body">
+      <div class="combined-container">
+      <p class="info-text" id="shipping_details">Orders placed before 12:00pm E.S.T. <span id="shipping-cutoff"></span> with offered shipping speeds will arrive on or before listed delivery dates.</p>
+      <div class="countdown">
+          Order within:
+          <span id="days">1</span> <span id="days-plural">Days</span>
+          <span id="hours">8</span> <span id="hours-plural">Hours</span>
+          <span id="minutes">32</span> <span id="minutes-plural">Minutes</span>
+          <span id="seconds">2</span> <span id="seconds-plural">Seconds</span>
+      </div>
+      
+      
+      <!-- Table to display the shipping speeds and delivery dates -->
+      <table class="shipping_date_table table table-bordered table-striped table-responsive-sm">
+        <thead>
+          <tr>
+              <th><strong>Shipping Speed</strong></th>
+              <th><span class="heading">8-10 <i class="business-days">Business Days</i></span></th>
+              <th><span class="heading">5-7 <i class="business-days">Business Days</i></span></th>
+              <th><span class="heading">3-4 <i class="business-days">Business Days</i></span></th>
+              <th><span class="heading">2 <i class="business-days">Business Days</i></span></th>
+              <th><span class="heading">Overnight <i class="business-days">1 Business Day</i></span></th></span></th>
+          </tr>
+      </thead>
+      
+          <tbody id="deliveryDatesTable">
+            <tr>
+          <td>8-10 Business Days</td>
+          <td>5-7 Business Days</td>
+          <td>3-4 Business Days</td>
+          <td>2 Business Days</td>
+          <td>Overnight</td>
+      </tr>
+      
+              <!-- JavaScript will populate the rows -->
+          </tbody>
+      </table>
+      <p id="holiday-message">*A shipping holiday has been accounted for in this timeline</p>
+      </div>
+    <script src="shippingDate.js"></script>
+  </body>
+</html>
