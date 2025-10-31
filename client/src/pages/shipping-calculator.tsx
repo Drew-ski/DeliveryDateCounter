@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Clock } from 'lucide-react';
+import { Clock, Package } from 'lucide-react';
 
 const shippingHolidays = [
   new Date("Nov 23, 2023"),
@@ -88,7 +88,7 @@ interface TimeLeft {
 export default function ShippingCalculator() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
   const [cutoffDate, setCutoffDate] = useState<string>('');
-  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; date: string; hasHoliday: boolean }>>([]);
+  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean }>>([]);
   const [showHolidayMessage, setShowHolidayMessage] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
 
@@ -107,17 +107,18 @@ export default function ShippingCalculator() {
 
   const updateDeliveryDates = () => {
     const shippingSpeeds = [
-      { speed: '8-10 Business Days', days: 10 },
-      { speed: '5-7 Business Days', days: 7 },
-      { speed: '3-4 Business Days', days: 4 },
-      { speed: '2 Business Days', days: 2 },
-      { speed: 'Overnight (1 Business Day)', days: 1 },
+      { speed: 'Overnight', label: '1 Business Day', days: 1 },
+      { speed: '2 Day', label: '2 Business Days', days: 2 },
+      { speed: '3-4 Day', label: '3-4 Business Days', days: 4 },
+      { speed: '5-7 Day', label: '5-7 Business Days', days: 7 },
+      { speed: '8-10 Day', label: '8-10 Business Days', days: 10 },
     ];
 
-    const dates = shippingSpeeds.map(({ speed, days }) => {
+    const dates = shippingSpeeds.map(({ speed, label, days }) => {
       const { deliveryDate, containsShippingHoliday } = calculateDeliveryDate(days);
       return {
         speed,
+        label,
         date: formatDate(deliveryDate),
         hasHoliday: containsShippingHoliday,
       };
@@ -198,33 +199,46 @@ export default function ShippingCalculator() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse" data-testid="table-shipping">
-                <thead>
-                  <tr>
-                    <th className="bg-muted px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide border border-border">
-                      Shipping Speed
-                    </th>
-                    {deliveryDates.map((item, idx) => (
-                      <th key={idx} className="bg-muted px-4 py-3 text-center text-sm font-semibold uppercase tracking-wide border border-border" data-testid={`header-${idx}`}>
-                        {item.speed.split(' (')[0]}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="px-4 py-4 font-semibold border border-border bg-card">
-                      Guaranteed Delivery On or Before
-                    </td>
-                    {deliveryDates.map((item, idx) => (
-                      <td key={idx} className="px-4 py-4 text-center font-medium border border-border" data-testid={`delivery-date-${idx}`}>
-                        {item.date}{item.hasHoliday && '*'}
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold">Guaranteed Delivery Timeline</h3>
+              </div>
+
+              <div className="relative px-4 py-8">
+                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-border" style={{ transform: 'translateY(-50%)' }} />
+                
+                <div className="relative flex justify-between items-center">
+                  {deliveryDates.map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center flex-1" data-testid={`timeline-item-${idx}`}>
+                      <div className="relative z-10 mb-6">
+                        <div 
+                          className={`w-12 h-12 rounded-full border-4 border-background flex items-center justify-center font-bold text-sm transition-all ${
+                            idx === 0 
+                              ? 'bg-primary text-primary-foreground scale-110' 
+                              : 'bg-card border-primary/20 text-foreground hover-elevate'
+                          }`}
+                          data-testid={`circle-${idx}`}
+                        >
+                          {idx + 1}
+                        </div>
+                      </div>
+
+                      <div className="text-center space-y-1 max-w-[140px]">
+                        <div className="text-sm font-semibold text-foreground" data-testid={`speed-${idx}`}>
+                          {item.speed}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {item.label}
+                        </div>
+                        <div className="text-sm font-medium text-foreground mt-2" data-testid={`delivery-date-${idx}`}>
+                          {item.date}{item.hasHoliday && '*'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {showHolidayMessage && (
