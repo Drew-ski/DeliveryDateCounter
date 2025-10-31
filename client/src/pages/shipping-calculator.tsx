@@ -13,7 +13,6 @@ const shippingHolidays = [
   new Date("Nov 27, 2025"),  // Thanksgiving 2025
   new Date("Dec 25, 2025"),  // Christmas 2025
   new Date("Jan 1, 2026"),   // New Year's Day 2026
-  new Date("Nov 8, 2025"),   // Test Date
 ];
 
 function ordinalSuffix(n: number): string {
@@ -43,19 +42,17 @@ function isShippingHoliday(date: Date): boolean {
   return false;
 }
 
-function getShipDate(now: Date): Date {
-  const shipDate = new Date(now);
-  shipDate.setHours(12, 0, 0, 0);
-
-  if (now.getHours() >= 12) {
-    shipDate.setDate(shipDate.getDate() + 1);
-  }
-
-  while (isShippingHoliday(shipDate) || isWeekend(shipDate)) {
-    shipDate.setDate(shipDate.getDate() + 1);
-  }
-
-  return shipDate;
+/**
+ * Single source of truth: next shipping cutoff (noon ET on next business day).
+ * This replaces using getShipDate() inside the countdown tick and prevents the
+ * "total never goes negative" problem that blocked UI refreshes.
+ */
+function nextShippingCutoff(from: Date): Date {
+  const d = new Date(from);
+  d.setHours(12, 0, 0, 0);
+  if (from.getHours() >= 12) d.setDate(d.getDate() + 1);
+  while (isShippingHoliday(d) || isWeekend(d)) d.setDate(d.getDate() + 1);
+  return d;
 }
 
 function formatDate(date: Date): string {
@@ -65,9 +62,27 @@ function formatDate(date: Date): string {
   return `${dayName}, ${monthName} ${dayWithSuffix}`;
 }
 
-function calculateDeliveryDate(additionalDays: number): { deliveryDate: Date; containsShippingHoliday: boolean } {
-  const now = getCurrentDate();
-  const deliveryDate = getShipDate(now);
+/**
+ * Diff helper for countdown from a fixed deadline.
+ */
+function diff(now: Date, deadline: Date): TimeLeft {
+  const t = deadline.getTime() - now.getTime();
+  const days = Math.floor(t / 86400000);
+  const hours = Math.floor((t % 86400000) / 3600000);
+  const minutes = Math.floor((t % 3600000) / 60000);
+  const seconds = Math.floor((t % 60000) / 1000);
+  return { days, hours, minutes, seconds, total: t };
+}
+
+/**
+ * Delivery date calculator that starts from a provided base ship date (the
+ * same deadline the countdown uses), keeping the whole UI in sync.
+ */
+function calculateDeliveryDateFromBase(
+  baseShipDate: Date,
+  additionalDays: number
+): { deliveryDate: Date; containsShippingHoliday: boolean } {
+  const deliveryDate = new Date(baseShipDate);
   let containsShippingHoliday = false;
 
   while (additionalDays > 0) {
@@ -85,6 +100,11 @@ function calculateDeliveryDate(additionalDays: number): { deliveryDate: Date; co
   return { deliveryDate, containsShippingHoliday };
 }
 
+// Keep the old name for backward compatibility in handleDateChange
+function getShipDate(now: Date): Date {
+  return nextShippingCutoff(now);
+}
+
 interface TimeLeft {
   days: number;
   hours: number;
@@ -94,28 +114,17 @@ interface TimeLeft {
 }
 
 export default function ShippingCalculator() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
-  const [cutoffDate, setCutoffDate] = useState<string>('');
+  // New: track the deadline/cutoff explicitly and derive everything from it.
+  const [deadline, setDeadline] = useState<Date>(() => nextShippingCutoff(getCurrentDate()));
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => diff(getCurrentDate(), nextShippingCutoff(getCurrentDate())));
+  const [cutoffDate, setCutoffDate] = useState<string>(() => formatDate(nextShippingCutoff(getCurrentDate())));
   const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean; days: number }>>([]);
   const [showHolidayMessage, setShowHolidayMessage] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
   const [targetDate, setTargetDate] = useState<string>('');
   const [recommendation, setRecommendation] = useState<string>('');
 
-  const calculateTimeLeft = (): TimeLeft => {
-    const now = getCurrentDate();
-    const deadline = getShipDate(now);
-    const t = deadline.getTime() - now.getTime();
-
-    const days = Math.floor((t / (1000 * 60 * 60 * 24)));
-    const hours = Math.floor((t % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((t % (1000 * 60)) / 1000);
-
-    return { days, hours, minutes, seconds, total: t };
-  };
-
-  const updateDeliveryDates = () => {
+  const updateDeliveryDates = (base: Date) => {
     const shippingSpeeds = [
       { speed: 'Overnight', label: '1 Business Day', days: 1 },
       { speed: '2 Day', label: '2 Business Days', days: 2 },
@@ -125,7 +134,7 @@ export default function ShippingCalculator() {
     ];
 
     const dates = shippingSpeeds.map(({ speed, label, days }) => {
-      const { deliveryDate, containsShippingHoliday } = calculateDeliveryDate(days);
+      const { deliveryDate, containsShippingHoliday } = calculateDeliveryDateFromBase(base, days);
       return {
         speed,
         label,
@@ -214,34 +223,32 @@ export default function ShippingCalculator() {
   };
 
   useEffect(() => {
-    const updateCutoffDate = () => {
-      const now = getCurrentDate();
-      const orderBeforeDate = getShipDate(now);
-      setCutoffDate(formatDate(orderBeforeDate));
-    };
-
-    updateCutoffDate();
-    updateDeliveryDates();
+    // initial render
+    updateDeliveryDates(deadline);
     setFadeIn(true);
 
     const interval = setInterval(() => {
-      const newTimeLeft = calculateTimeLeft();
-      
-      if (newTimeLeft.total < 0) {
+      const now = getCurrentDate();
+      const newDeadline = nextShippingCutoff(now);
+
+      // detect rollover (e.g., noon or after weekend/holiday)
+      if (newDeadline.getTime() !== deadline.getTime()) {
         setFadeIn(false);
         setTimeout(() => {
-          updateCutoffDate();
-          updateDeliveryDates();
-          setTimeLeft(calculateTimeLeft());
+          setDeadline(newDeadline);
+          setCutoffDate(formatDate(newDeadline));
+          updateDeliveryDates(newDeadline);
+          setTimeLeft(diff(now, newDeadline)); // Immediately set countdown with new deadline
           setFadeIn(true);
         }, 300);
       } else {
-        setTimeLeft(newTimeLeft);
+        // tick countdown against *current* deadline
+        setTimeLeft(diff(now, deadline));
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [deadline]);
 
   const TimeSegment = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center gap-1" data-testid={`countdown-${label.toLowerCase()}`}>
@@ -254,8 +261,12 @@ export default function ShippingCalculator() {
     </div>
   );
 
+  // UX tweak:
+  // - If >= 1 day left: show only Days (clean, simple display).
+  // - If < 1 day: show Hours, Minutes, Seconds as usual.
   const showDays = timeLeft.days >= 1;
-  const showHours = timeLeft.hours >= 1 || timeLeft.days > 0;
+  const showHours = timeLeft.days === 0 && timeLeft.hours >= 1;
+  const showMinutes = timeLeft.days === 0;
   const showSeconds = timeLeft.days === 0;
 
   return (
@@ -279,7 +290,7 @@ export default function ShippingCalculator() {
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 {showDays && <TimeSegment value={timeLeft.days} label="Days" />}
                 {showHours && <TimeSegment value={timeLeft.hours} label="Hours" />}
-                <TimeSegment value={timeLeft.minutes} label="Minutes" />
+                {showMinutes && <TimeSegment value={timeLeft.minutes} label="Minutes" />}
                 {showSeconds && <TimeSegment value={timeLeft.seconds} label="Seconds" />}
               </div>
             </div>

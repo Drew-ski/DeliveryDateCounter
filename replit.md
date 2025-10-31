@@ -90,6 +90,9 @@ Preferred communication style: Simple, everyday language.
 - Updates every second for real-time display
 - Pluralization logic for time unit labels (day/days, hour/hours, etc.)
 - Automatic reset with fade animation when countdown reaches zero
+- Rollover detection: When cutoff passes (noon or after weekend/holiday), all UI elements (countdown, cutoff date, delivery dates) refresh together in lockstep
+- Simplified display: Multi-day countdowns show only "Days" (e.g., "3 Days"), same-day shows full breakdown (e.g., "12 Hours 30 Minutes 15 Seconds")
+- Uses single source of truth (nextShippingCutoff) to prevent "total never goes negative" bug that previously blocked UI refreshes
 
 **Reverse Lookup Feature (Date Picker)**
 - Collapsible accordion below timeline allows users to select target delivery date
