@@ -330,7 +330,7 @@ export default function ShippingCalculator() {
             <div className="bg-card border border-card-border rounded-lg p-6">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Clock className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold" data-testid="text-order-within">Order within:</h2>
+                <h2 className="text-xl font-semibold" data-testid="text-order-within">Place order within:</h2>
               </div>
 
               <div className="flex items-center justify-center gap-2 flex-wrap">
