@@ -13,6 +13,7 @@ const shippingHolidays = [
   new Date("Nov 27, 2025"),  // Thanksgiving 2025
   new Date("Dec 25, 2025"),  // Christmas 2025
   new Date("Jan 1, 2026"),   // New Year's Day 2026
+  new Date("Nov 8, 2025"),  // Test Holiday Day
 ];
 
 function ordinalSuffix(n: number): string {
