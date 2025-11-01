@@ -320,24 +320,26 @@ export default function ShippingCalculator() {
 
         <Card className={`p-6 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           <div className="space-y-5">
-            <div className="text-center space-y-2">
-              <p className="text-base text-foreground" data-testid="text-shipping-details">
-                Orders placed before <span className="font-semibold">12:00pm E.S.T.</span> on{' '}
-                <span className="font-semibold" data-testid="text-cutoff-date">{cutoffDate}</span> with offered shipping speeds will arrive on or before listed delivery dates.
-              </p>
-            </div>
-
-            <div className="bg-card border border-card-border rounded-lg p-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Clock className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold" data-testid="text-order-within">Place order within:</h2>
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch">
+              <div className="space-y-2 text-center lg:flex-1 lg:text-left">
+                <p className="text-base text-foreground" data-testid="text-shipping-details">
+                  Orders placed before <span className="font-semibold">12:00pm E.S.T.</span> on{' '}
+                  <span className="font-semibold" data-testid="text-cutoff-date">{cutoffDate}</span> with offered shipping speeds will arrive on or before listed delivery dates.
+                </p>
               </div>
 
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {showDays && <TimeSegment value={timeLeft.days} label="Days" />}
-                {showHours && <TimeSegment value={timeLeft.hours} label="Hours" />}
-                {showMinutes && <TimeSegment value={timeLeft.minutes} label="Minutes" />}
-                {showSeconds && <TimeSegment value={timeLeft.seconds} label="Seconds" />}
+              <div className="bg-card border border-card-border rounded-lg p-4 lg:w-[23rem]">
+                <div className="flex items-center justify-center gap-2 mb-4 lg:justify-start">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <h2 className="text-xl font-semibold" data-testid="text-order-within">Place order within:</h2>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 flex-wrap lg:justify-start">
+                  {showDays && <TimeSegment value={timeLeft.days} label="Days" />}
+                  {showHours && <TimeSegment value={timeLeft.hours} label="Hours" />}
+                  {showMinutes && <TimeSegment value={timeLeft.minutes} label="Minutes" />}
+                  {showSeconds && <TimeSegment value={timeLeft.seconds} label="Seconds" />}
+                </div>
               </div>
             </div>
 
