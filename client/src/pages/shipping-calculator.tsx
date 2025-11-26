@@ -384,7 +384,7 @@ export default function ShippingCalculator() {
                           ))}
                         </div>
                         
-                        <div className="absolute left-[10%] right-[10%] h-0.5 bg-border" style={{ top: 'calc(2.5rem + 0.75rem + 3px)' }} />
+                        <div className="absolute left-[10%] right-[10%] h-0.5 bg-border" style={{ top: 'calc(3.5rem + 0.75rem + 4px)' }} />
                       </div>
                     </div>
                   </div>
