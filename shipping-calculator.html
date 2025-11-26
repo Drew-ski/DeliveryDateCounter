@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Timeline Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .calculator {
+            min-height: 100vh;
+            background: #ffffff;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 56rem;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #f9f9f9;
+            border: 1px solid #e8e8e8;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: opacity 300ms ease;
+        }
+
+        .card.fade-out {
+            opacity: 0;
+        }
+
+        .card.fade-in {
+            opacity: 1;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .shipping-details {
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+
+        .shipping-details strong {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .cutoff-date {
+            font-weight: 600;
+        }
+
+        .countdown-box {
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .countdown-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .countdown-header svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #d50000;
+        }
+
+        .countdown-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .countdown-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .time-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 80px;
+        }
+
+        .time-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #d50000;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .time-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .shipping-options {
+            margin-bottom: 1.5rem;
+        }
+
+        .shipping-options h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shipping-options svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #d50000;
+        }
+
+        .delivery-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .delivery-option {
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: background-color 150ms, box-shadow 150ms;
+        }
+
+        .delivery-option:hover {
+            background-color: #f5f5f5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+
+        .delivery-speed {
+            font-weight: 600;
+            color: #d50000;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .delivery-label {
+            font-size: 0.75rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .delivery-date {
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .holiday-indicator {
+            color: #d50000;
+            font-weight: 600;
+        }
+
+        .holiday-message {
+            background: #fff5f5;
+            border-left: 4px solid #d50000;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #d50000;
+            display: none;
+        }
+
+        .holiday-message.show {
+            display: block;
+        }
+
+        .date-picker-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid #e8e8e8;
+            padding-top: 1.5rem;
+        }
+
+        .accordion {
+            border: 1px solid #e8e8e8;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 1rem;
+            background: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 150ms;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-header svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #d50000;
+            transition: transform 300ms;
+        }
+
+        .accordion-header.open svg {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 300ms ease;
+            background: #fafafa;
+        }
+
+        .accordion-content.open {
+            max-height: 500px;
+        }
+
+        .accordion-body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .form-group input {
+            padding: 0.5rem;
+            border: 1px solid #e8e8e8;
+            border-radius: 0.25rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #d50000;
+            box-shadow: 0 0 0 2px rgba(213, 0, 0, 0.1);
+        }
+
+        .recommendation {
+            padding: 0.75rem;
+            background: #f0f9ff;
+            border-left: 4px solid #d50000;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            color: #1a1a1a;
+            margin-top: 0.5rem;
+        }
+
+        .recommendation.error {
+            background: #fef2f2;
+            color: #d50000;
+        }
+
+        @media (max-width: 640px) {
+            .delivery-timeline {
+                grid-template-columns: 1fr;
+            }
+
+            .time-value {
+                font-size: 2.5rem;
+            }
+
+            .countdown-display {
+                gap: 0.25rem;
+            }
+
+            .time-segment {
+                min-width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="container">
+            <div class="card fade-in" id="mainCard">
+                <div class="text-center shipping-details" data-testid="text-shipping-details">
+                    Orders placed before <strong>12:00pm E.S.T.</strong> on
+                    <strong class="cutoff-date" id="cutoffDate"></strong> with offered shipping speeds will arrive on or before listed delivery dates.
+                </div>
+
+                <div class="countdown-box">
+                    <div class="countdown-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <h2>Order within:</h2>
+                    </div>
+                    <div class="countdown-display" id="countdownDisplay"></div>
+                </div>
+
+                <div class="shipping-options">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        Shipping Options
+                    </h3>
+                    <div class="delivery-timeline" id="deliveryTimeline"></div>
+                    <div class="holiday-message" id="holidayMessage">
+                        * Some delivery dates include weekends or holidays and may be adjusted
+                    </div>
+                </div>
+
+                <div class="date-picker-section">
+                    <div class="accordion">
+                        <button class="accordion-header" id="accordionHeader">
+                            <span>Find shipping speed for a target delivery date</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="accordion-content" id="accordionContent">
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label for="targetDate">Select Target Delivery Date:</label>
+                                    <input type="date" id="targetDate" />
+                                </div>
+                                <div class="recommendation" id="recommendation" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Shipping holidays
+        const shippingHolidays = [
+            new Date("Nov 27, 2025"),
+            new Date("Dec 25, 2025"),
+            new Date("Jan 1, 2026"),
+        ];
+
+        function ordinalSuffix(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
+        function getCurrentDate() {
+            const userTime = new Date();
+            const nyTime = new Date(userTime.toLocaleString("en-US", { timeZone: "America/New_York" }));
+            return nyTime;
+        }
+
+        function isWeekend(date) {
+            return date.getDay() === 6 || date.getDay() === 0;
+        }
+
+        function isShippingHoliday(date) {
+            for (const holiday of shippingHolidays) {
+                if (holiday.getDate() === date.getDate()
+                    && holiday.getMonth() === date.getMonth()
+                    && holiday.getFullYear() === date.getFullYear()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function nextShippingCutoff(from) {
+            const d = new Date(from);
+            d.setHours(12, 0, 0, 0);
+            if (from.getHours() >= 12) d.setDate(d.getDate() + 1);
+            while (isShippingHoliday(d) || isWeekend(d)) d.setDate(d.getDate() + 1);
+            return d;
+        }
+
+        function formatDate(date) {
+            const dayWithSuffix = ordinalSuffix(date.getDate());
+            const dayName = date.toLocaleDateString("en-US", { weekday: 'long' });
+            const monthName = date.toLocaleDateString("en-US", { month: 'long' });
+            return `${dayName}, ${monthName} ${dayWithSuffix}`;
+        }
+
+        function diff(now, deadline) {
+            const t = deadline.getTime() - now.getTime();
+            const days = Math.floor(t / 86400000);
+            const hours = Math.floor((t % 86400000) / 3600000);
+            const minutes = Math.floor((t % 3600000) / 60000);
+            const seconds = Math.floor((t % 60000) / 1000);
+            return { days, hours, minutes, seconds, total: t };
+        }
+
+        function calculateDeliveryDateFromBase(baseShipDate, additionalDays) {
+            const deliveryDate = new Date(baseShipDate);
+            let containsShippingHoliday = false;
+
+            while (additionalDays > 0) {
+                deliveryDate.setDate(deliveryDate.getDate() + 1);
+                const shippingHoliday = isShippingHoliday(deliveryDate);
+                if (shippingHoliday) {
+                    containsShippingHoliday = true;
+                }
+                const weekend = isWeekend(deliveryDate);
+                if (!shippingHoliday && !weekend) {
+                    additionalDays--;
+                }
+            }
+
+            return { deliveryDate, containsShippingHoliday };
+        }
+
+        function countBusinessDays(startDate, endDate) {
+            let count = 0;
+            const current = new Date(startDate);
+            current.setDate(current.getDate() + 1);
+
+            while (current <= endDate) {
+                if (!isWeekend(current) && !isShippingHoliday(current)) {
+                    count++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+
+            return count;
+        }
+
+        // State
+        let state = {
+            deadline: nextShippingCutoff(getCurrentDate()),
+            timeLeft: { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 },
+            deliveryDates: [],
+            showHolidayMessage: false,
+        };
+
+        // DOM Elements
+        const cutoffDateEl = document.getElementById("cutoffDate");
+        const countdownDisplayEl = document.getElementById("countdownDisplay");
+        const deliveryTimelineEl = document.getElementById("deliveryTimeline");
+        const holidayMessageEl = document.getElementById("holidayMessage");
+        const accordionHeaderEl = document.getElementById("accordionHeader");
+        const accordionContentEl = document.getElementById("accordionContent");
+        const targetDateEl = document.getElementById("targetDate");
+        const recommendationEl = document.getElementById("recommendation");
+        const mainCardEl = document.getElementById("mainCard");
+
+        // Accordion toggle
+        accordionHeaderEl.addEventListener("click", () => {
+            accordionHeaderEl.classList.toggle("open");
+            accordionContentEl.classList.toggle("open");
+        });
+
+        // Target date change handler
+        targetDateEl.addEventListener("change", (e) => {
+            const inputDate = e.target.value;
+            if (!inputDate) {
+                recommendationEl.style.display = "none";
+                return;
+            }
+
+            const target = new Date(inputDate);
+            const shipDate = state.deadline;
+
+            if (target <= shipDate) {
+                recommendationEl.textContent = "Please select a future delivery date.";
+                recommendationEl.classList.add("error");
+                recommendationEl.style.display = "block";
+                return;
+            }
+
+            const businessDaysNeeded = countBusinessDays(shipDate, target);
+            const formattedDate = target.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+
+            const shippingOptions = [
+                { name: 'Overnight shipping', maxDays: 1 },
+                { name: '2 Day shipping', maxDays: 2 },
+                { name: '3-4 Day shipping', maxDays: 4 },
+                { name: '5-7 Day shipping', maxDays: 7 },
+                { name: '8-10 Day shipping', maxDays: 10 },
+            ];
+
+            const suitableOptions = shippingOptions.filter(option => option.maxDays <= businessDaysNeeded);
+
+            recommendationEl.classList.remove("error");
+            if (suitableOptions.length > 0) {
+                const slowestSuitable = suitableOptions[suitableOptions.length - 1];
+                recommendationEl.textContent = `To ensure delivery by ${formattedDate}, we recommend ${slowestSuitable.name}.`;
+            } else {
+                recommendationEl.textContent = `Sorry, even Overnight shipping cannot guarantee delivery by ${formattedDate}. Please select a later date.`;
+                recommendationEl.classList.add("error");
+            }
+            recommendationEl.style.display = "block";
+        });
+
+        function updateUI() {
+            const now = getCurrentDate();
+            state.timeLeft = diff(now, state.deadline);
+
+            // Update cutoff date
+            cutoffDateEl.textContent = formatDate(state.deadline);
+
+            // Update countdown
+            countdownDisplayEl.innerHTML = "";
+            const showDays = state.timeLeft.days >= 1;
+            const showHours = state.timeLeft.days === 0 && state.timeLeft.hours >= 1;
+            const showMinutes = state.timeLeft.days === 0;
+            const showSeconds = state.timeLeft.days === 0;
+
+            if (showDays) addTimeSegment(state.timeLeft.days, "Days");
+            if (showHours) addTimeSegment(state.timeLeft.hours, "Hours");
+            if (showMinutes) addTimeSegment(state.timeLeft.minutes, "Minutes");
+            if (showSeconds) addTimeSegment(state.timeLeft.seconds, "Seconds");
+
+            // Update delivery dates
+            updateDeliveryDates();
+        }
+
+        function addTimeSegment(value, label) {
+            const displayLabel = value === 1 ? label.slice(0, -1) : label;
+            const segment = document.createElement("div");
+            segment.className = "time-segment";
+            segment.innerHTML = `
+                <div class="time-value">${value}</div>
+                <div class="time-label">${displayLabel}</div>
+            `;
+            countdownDisplayEl.appendChild(segment);
+        }
+
+        function updateDeliveryDates() {
+            const shippingSpeeds = [
+                { speed: 'Overnight', label: '1 Business Day', days: 1 },
+                { speed: '2 Day', label: '2 Business Days', days: 2 },
+                { speed: '3-4 Day', label: '3-4 Business Days', days: 4 },
+                { speed: '5-7 Day', label: '5-7 Business Days', days: 7 },
+                { speed: '8-10 Day', label: '8-10 Business Days', days: 10 },
+            ];
+
+            state.deliveryDates = shippingSpeeds.map(({ speed, label, days }) => {
+                const { deliveryDate, containsShippingHoliday } = calculateDeliveryDateFromBase(state.deadline, days);
+                return {
+                    speed,
+                    label,
+                    date: formatDate(deliveryDate),
+                    hasHoliday: containsShippingHoliday,
+                    days,
+                };
+            });
+
+            state.showHolidayMessage = state.deliveryDates.some(d => d.hasHoliday);
+            holidayMessageEl.classList.toggle("show", state.showHolidayMessage);
+
+            // Render delivery options
+            deliveryTimelineEl.innerHTML = state.deliveryDates.map(option => `
+                <div class="delivery-option">
+                    <div class="delivery-speed">${option.speed}</div>
+                    <div class="delivery-label">${option.label}</div>
+                    <div class="delivery-date">
+                        ${option.date}${option.hasHoliday ? ' <span class="holiday-indicator">*</span>' : ''}
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function tick() {
+            const now = getCurrentDate();
+            const newDeadline = nextShippingCutoff(now);
+
+            // Detect rollover
+            if (newDeadline.getTime() !== state.deadline.getTime()) {
+                mainCardEl.classList.remove("fade-in");
+                mainCardEl.classList.add("fade-out");
+                setTimeout(() => {
+                    state.deadline = newDeadline;
+                    updateUI();
+                    mainCardEl.classList.remove("fade-out");
+                    mainCardEl.classList.add("fade-in");
+                }, 300);
+            } else {
+                updateUI();
+            }
+        }
+
+        // Initialize and start interval
+        updateUI();
+        setInterval(tick, 1000);
+    </script>
+</body>
+</html>
