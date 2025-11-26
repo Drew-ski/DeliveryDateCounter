@@ -359,9 +359,12 @@ export default function ShippingCalculator() {
                         <div className="grid grid-cols-5">
                           {deliveryDates.map((item, idx) => (
                             <div key={idx} className="flex flex-col items-center px-2" data-testid={`timeline-item-${idx}`}>
-                              <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
-                                <div className="text-sm font-semibold text-foreground" data-testid={`speed-${idx}`}>
-                                  {item.label}
+                              <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center flex-col gap-0.5">
+                                <div className="text-2xl font-bold text-foreground" data-testid={`speed-${idx}`}>
+                                  {item.days}
+                                </div>
+                                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                  Business Day{item.days !== 1 ? 's' : ''}
                                 </div>
                               </div>
 

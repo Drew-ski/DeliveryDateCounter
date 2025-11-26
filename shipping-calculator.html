@@ -190,16 +190,20 @@
         }
 
         .delivery-speed {
-            font-weight: 600;
-            color: #d50000;
-            font-size: 0.875rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 1.875rem;
             margin-bottom: 0.25rem;
+            line-height: 1;
         }
 
         .delivery-label {
-            font-size: 0.75rem;
+            font-size: 0.625rem;
             color: #999;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .delivery-date {
@@ -626,8 +630,8 @@
             // Render delivery options
             deliveryTimelineEl.innerHTML = state.deliveryDates.map(option => `
                 <div class="delivery-option">
-                    <div class="delivery-speed">${option.speed}</div>
-                    <div class="delivery-label">${option.label}</div>
+                    <div class="delivery-speed">${option.days}</div>
+                    <div class="delivery-label">Business Day${option.days !== 1 ? 's' : ''}</div>
                     <div class="delivery-date">
                         ${option.date}${option.hasHoliday ? ' <span class="holiday-indicator">*</span>' : ''}
                     </div>
