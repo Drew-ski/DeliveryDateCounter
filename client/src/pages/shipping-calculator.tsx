@@ -321,12 +321,12 @@ export default function ShippingCalculator() {
 
         <Card className={`p-6 transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           <div className="space-y-5">
-            <div className="text-center space-y-2">
+            {/* <div className="text-center space-y-2">
               <p className="text-base text-foreground" data-testid="text-shipping-details">
                 Orders placed before <span className="font-semibold">12:00pm E.S.T.</span> on{' '}
                 <span className="font-semibold" data-testid="text-cutoff-date">{cutoffDate}</span> with offered shipping speeds will arrive on or before listed delivery dates.
               </p>
-            </div>
+            </div> */}
 
             <div className="bg-card border border-card-border rounded-lg countdown-section-enhanced">
               <div className="flex items-center justify-center gap-2 mb-4">
