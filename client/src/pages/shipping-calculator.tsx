@@ -118,7 +118,7 @@ export default function ShippingCalculator() {
   const [deadline, setDeadline] = useState<Date>(() => nextShippingCutoff(getCurrentDate()));
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => diff(getCurrentDate(), nextShippingCutoff(getCurrentDate())));
   const [cutoffDate, setCutoffDate] = useState<string>(() => formatDate(nextShippingCutoff(getCurrentDate())));
-  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean; days: number }>>([]);
+  const [deliveryDates, setDeliveryDates] = useState<Array<{ speed: string; label: string; date: string; hasHoliday: boolean; days: number; displayDays: string }>>([]);
   const [showHolidayMessage, setShowHolidayMessage] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
   const [targetDate, setTargetDate] = useState<string>('');
@@ -138,14 +138,14 @@ export default function ShippingCalculator() {
 
   const updateDeliveryDates = (base: Date) => {
     const shippingSpeeds = [
-      { speed: 'Overnight', label: 'Overnight', days: 1 },
-      { speed: '2 Day', label: '2 Business Days', days: 2 },
-      { speed: '3-4 Day', label: '3-4 Business Days', days: 4 },
-      { speed: '5-7 Day', label: '5-7 Business Days', days: 7 },
-      { speed: '8-10 Day', label: '8-10 Business Days', days: 10 },
+      { speed: 'Overnight', label: 'Overnight', days: 1, displayDays: 'Overnight' },
+      { speed: '2 Day', label: '2 Business Days', days: 2, displayDays: '2' },
+      { speed: '3-4 Day', label: '3-4 Business Days', days: 4, displayDays: '3-4' },
+      { speed: '5-7 Day', label: '5-7 Business Days', days: 7, displayDays: '5-7' },
+      { speed: '8-10 Day', label: '8-10 Business Days', days: 10, displayDays: '8-10' },
     ];
 
-    const dates = shippingSpeeds.map(({ speed, label, days }) => {
+    const dates = shippingSpeeds.map(({ speed, label, days, displayDays }) => {
       const { deliveryDate, containsShippingHoliday } = calculateDeliveryDateFromBase(base, days);
       return {
         speed,
@@ -153,6 +153,7 @@ export default function ShippingCalculator() {
         date: formatDate(deliveryDate),
         hasHoliday: containsShippingHoliday,
         days,
+        displayDays,
       };
     });
 
@@ -361,11 +362,13 @@ export default function ShippingCalculator() {
                             <div key={idx} className="flex flex-col items-center px-2" data-testid={`timeline-item-${idx}`}>
                               <div className="text-center mb-3 min-h-[2.5rem] flex items-center justify-center flex-col gap-0.5">
                                 <div className="text-2xl font-bold text-foreground" data-testid={`speed-${idx}`}>
-                                  {item.days}
+                                  {item.displayDays}
                                 </div>
-                                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                  Business Day{item.days !== 1 ? 's' : ''}
-                                </div>
+                                {item.displayDays !== 'Overnight' && (
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                    Business Day{item.days !== 1 ? 's' : ''}
+                                  </div>
+                                )}
                               </div>
 
                               <div className="relative w-full flex justify-center items-center" style={{ height: '8px' }}>

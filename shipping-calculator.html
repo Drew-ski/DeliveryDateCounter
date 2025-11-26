@@ -606,11 +606,11 @@
 
         function updateDeliveryDates() {
             const shippingSpeeds = [
-                { speed: 'Overnight', label: 'Overnight', days: 1 },
-                { speed: '2 Day', label: '2 Business Days', days: 2 },
-                { speed: '3-4 Day', label: '3-4 Business Days', days: 4 },
-                { speed: '5-7 Day', label: '5-7 Business Days', days: 7 },
-                { speed: '8-10 Day', label: '8-10 Business Days', days: 10 },
+                { speed: 'Overnight', label: 'Overnight', days: 1, displayDays: 'Overnight' },
+                { speed: '2 Day', label: '2 Business Days', days: 2, displayDays: '2' },
+                { speed: '3-4 Day', label: '3-4 Business Days', days: 4, displayDays: '3-4' },
+                { speed: '5-7 Day', label: '5-7 Business Days', days: 7, displayDays: '5-7' },
+                { speed: '8-10 Day', label: '8-10 Business Days', days: 10, displayDays: '8-10' },
             ];
 
             state.deliveryDates = shippingSpeeds.map(({ speed, label, days }) => {
@@ -630,8 +630,8 @@
             // Render delivery options
             deliveryTimelineEl.innerHTML = state.deliveryDates.map(option => `
                 <div class="delivery-option">
-                    <div class="delivery-speed">${option.days}</div>
-                    <div class="delivery-label">Business Day${option.days !== 1 ? 's' : ''}</div>
+                    <div class="delivery-speed">${option.displayDays}</div>
+                    ${option.displayDays !== 'Overnight' ? `<div class="delivery-label">Business Day${option.days !== 1 ? 's' : ''}</div>` : ''}
                     <div class="delivery-date">
                         ${option.date}${option.hasHoliday ? ' <span class="holiday-indicator">*</span>' : ''}
                     </div>
