@@ -156,6 +156,17 @@
             gap: 1rem;
         }
 
+        .timeline-header {
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.125rem;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
         .delivery-option {
             background: #ffffff;
             border: 2px solid #f0f0f0;
@@ -630,8 +641,10 @@
             // Render delivery options
             deliveryTimelineEl.innerHTML = state.deliveryDates.map(option => `
                 <div class="delivery-option">
-                    <div class="delivery-speed">${option.displayDays}</div>
-                    ${option.displayDays !== 'Overnight' ? `<div class="delivery-label">Business Day${option.days !== 1 ? 's' : ''}</div>` : ''}
+                    <div class="timeline-header">
+                        <div class="delivery-speed">${option.displayDays}</div>
+                        ${option.displayDays !== 'Overnight' ? `<div class="delivery-label">Business Day${option.days !== 1 ? 's' : ''}</div>` : ''}
+                    </div>
                     <div class="delivery-date">
                         ${option.date}${option.hasHoliday ? ' <span class="holiday-indicator">*</span>' : ''}
                     </div>
